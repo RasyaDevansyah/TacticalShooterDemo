@@ -2,27 +2,38 @@ extends CharacterBody3D
 
 
 @export var speed = 5.0
-@export var camera : Camera3D
-@export var cam_speed : float = 5
-@export var cam_rotation_amount : float = 1
+@export var cam : Node3D
+@export var cam_speed : float = 0.001
+@export var cam_rotation_amount : float = 0.07
+
+@export var cam_lean_left : float = 0.14
+@export var cam_lean_right : float = 0.14
+
+@export var weapon_holder : Node3D
+@export var weapon_sway_amount : float = 0.01
+@export var weapon_rotation_amount : float = 0.007
 
 var mouse_input : Vector2
 const JUMP_VELOCITY = 4.5
+var def_weapon_holder_pos : Vector3
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
+
+func _ready():
+	def_weapon_holder_pos = weapon_holder.position
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
 func _input(event):
-	if !camera:
+	if !cam:
 		return
 	if event is InputEventMouseMotion:
-		camera.rotation.x -= event.relative.y * cam_speed
-		camera.rotation.x = clamp(camera.rotation.x, -1.25, 1.5)
+		cam.rotation.x -= event.relative.y * cam_speed
+		cam.rotation.x = clamp(cam.rotation.x, -1.25, 1.5)
 		self.rotation.y -= event.relative.x * cam_speed
 		mouse_input = event.relative
 
-func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _physics_process(delta):
 	# Add the gravity.
@@ -45,3 +56,42 @@ func _physics_process(delta):
 		velocity.z = move_toward(velocity.z, 0, speed)
 
 	move_and_slide()
+	
+	if Input.is_action_pressed("leanLeft"):
+		cam_tilt(-1, cam_lean_left,  delta)
+		weapon_tilt(-1, weapon_rotation_amount, delta)
+	elif Input.is_action_pressed("leanRight"):
+		cam_tilt(1, cam_lean_right,  delta)
+		weapon_tilt(1, weapon_rotation_amount, delta)
+	else:
+		cam_tilt(input_dir.x, cam_rotation_amount,  delta)
+		weapon_tilt(input_dir.x, weapon_rotation_amount, delta)
+	
+		
+	weapon_sway(delta)
+	weapon_bob(velocity.length(), delta)
+
+func cam_tilt(input_x, rot, delta):
+	if cam:
+		cam.rotation.z = lerp(cam.rotation.z, -input_x * rot, 10 * delta)
+
+func weapon_tilt(input_x, rot,  delta):
+	if weapon_holder:
+		weapon_holder.rotation.z = lerp(weapon_holder.rotation.z, -input_x * rot * 10, 10 * delta)
+
+func weapon_sway(delta):
+	mouse_input = lerp(mouse_input, Vector2.ZERO, 10 * delta)
+	weapon_holder.rotation.x = lerp(weapon_holder.rotation.x, mouse_input.y * weapon_rotation_amount, 10 * delta)
+	weapon_holder.rotation.y = lerp(weapon_holder.rotation.y, mouse_input.x * weapon_rotation_amount, 10 * delta)
+
+func weapon_bob(vel : float, delta):
+	if weapon_holder:
+		if vel > 0:
+			var bob_amount : float = 0.01
+			var bob_freq : float = 0.01
+			#print(def_weapon_holder_pos.y)
+			weapon_holder.position.y = lerp(weapon_holder.position.y, def_weapon_holder_pos.y + sin(Time.get_ticks_msec() * bob_freq) * bob_amount, 10 * delta)
+			weapon_holder.position.x = lerp(weapon_holder.position.x, def_weapon_holder_pos.x + sin(Time.get_ticks_msec() * bob_freq * 0.5) * bob_amount, 10 * delta)
+		else:
+			weapon_holder.position.y = lerp(weapon_holder.position.y, def_weapon_holder_pos.y, 10 * delta)
+			weapon_holder.position.x = lerp(weapon_holder.position.x, def_weapon_holder_pos.x, 10 * delta)

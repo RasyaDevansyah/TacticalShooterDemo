@@ -1,8 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://tbt5amptfwb"]
+[gd_scene load_steps=16 format=3 uid="uid://tbt5amptfwb"]
 
 [ext_resource type="Texture2D" uid="uid://8bnltx045gvw" path="res://godot-prototype-texture/Vector/checker_black_512x512.svg" id="1_8d57h"]
 [ext_resource type="Script" path="res://scripts/Player.gd" id="2_fcjmw"]
 [ext_resource type="PackedScene" uid="uid://ge4ct6oeboaw" path="res://Scenes/pistol_project_accurate.tscn" id="2_rsl4k"]
+[ext_resource type="Script" path="res://scripts/gun.gd" id="4_uojde"]
+[ext_resource type="Curve" uid="uid://dxxr0uo1ihr2b" path="res://recoilRotaion.tres" id="5_no8lg"]
+[ext_resource type="Script" path="res://scripts/cameraShake.gd" id="6_rdoxp"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bktkc"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -24,6 +27,21 @@ uv1_triplanar = true
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_08set"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_uu8pw"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_u711w"]
+noise_type = 3
+
+[sub_resource type="Curve" id="Curve_dkg67"]
+min_value = -1.0
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.0748792, -0.781057), 0.0, 0.0, 0, 0, Vector2(0.126812, 0.16867), 0.0, 0.0, 0, 0, Vector2(0.193237, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Curve" id="Curve_k4ety"]
+min_value = -1.0
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.0748792, -0.781057), 0.0, 0.0, 0, 0, Vector2(0.126812, 0.16867), 0.0, 0.0, 0, 0, Vector2(0.193237, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -38,22 +56,51 @@ use_collision = true
 size = Vector3(52.5576, 0.001, 37.9729)
 material = SubResource("StandardMaterial3D_higyj")
 
-[node name="Player" type="CharacterBody3D" parent="." node_paths=PackedStringArray("camera")]
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.7231, 2.85621, -1.78809)
+use_collision = true
+size = Vector3(11.2737, 7.31507, 8.30957)
+material = SubResource("StandardMaterial3D_higyj")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.7231, 2.85621, 10.3021)
+use_collision = true
+size = Vector3(11.2737, 7.31507, 8.30957)
+material = SubResource("StandardMaterial3D_higyj")
+
+[node name="Player" type="CharacterBody3D" parent="." node_paths=PackedStringArray("cam", "weapon_holder")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.00986, 0)
+collision_layer = 4
 script = ExtResource("2_fcjmw")
-camera = NodePath("CamHolder/Camera3D")
-cam_speed = 0.001
-cam_rotation_amount = 0.075
+cam = NodePath("CamHolder")
+weapon_holder = NodePath("CamHolder/WeaponHolder")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_08set")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Player"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0.618454, 0)
+shape = SubResource("SphereShape3D_uu8pw")
+spring_length = 12.49
 
 [node name="CamHolder" type="Node3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.618454, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Player/CamHolder"]
+script = ExtResource("6_rdoxp")
+noise = SubResource("FastNoiseLite_u711w")
 
 [node name="WeaponHolder" type="Node3D" parent="Player/CamHolder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, -0.112, -0.05)
 
-[node name="Pistol Project Accurate" parent="Player/CamHolder/WeaponHolder" instance=ExtResource("2_rsl4k")]
-transform = Transform3D(-0.425, 0, -3.71547e-08, 0, 0.425, 0, 3.71547e-08, 0, -0.425, -0.045, -0.875, 0.28)
+[node name="Pistol Project Accurate" parent="Player/CamHolder/WeaponHolder" node_paths=PackedStringArray("target_object", "camera_shake") instance=ExtResource("2_rsl4k")]
+transform = Transform3D(-0.285, 0, -4.30338e-08, 0, 0.285, 0, 4.30338e-08, 0, -0.285, 0.125, 0, -0.095)
+script = ExtResource("4_uojde")
+target_object = NodePath(".")
+recoil_rotation_x = ExtResource("5_no8lg")
+recoil_rotation_z = SubResource("Curve_dkg67")
+recoil_position_z = SubResource("Curve_k4ety")
+recoil_amplitude = Vector3(0.75, 0.4, 0.15)
+lerp_speed = 5.0
+camera_shake = NodePath("../../Camera3D")
+camera_shake_amount = 0.4

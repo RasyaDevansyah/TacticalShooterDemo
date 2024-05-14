@@ -1658,9 +1658,10 @@ _data = {
 [node name="Pistol Project Accurate" type="Node3D"]
 
 [node name="Armature" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00012052, 0.626524, -0.202994)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.408225, -0.98331, -0.767567)
 
 [node name="Skeleton3D" type="Skeleton3D" parent="Armature"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.839263)
 bones/0/name = "Bone_Central"
 bones/0/parent = -1
 bones/0/rest = Transform3D(1, 0, 2.38419e-07, 0, 1, 0, -2.38419e-07, 0, 1, 0.000120927, 0.963066, -0.173845)
