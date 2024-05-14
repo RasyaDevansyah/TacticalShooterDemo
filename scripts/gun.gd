@@ -7,6 +7,7 @@ class_name RecoilHandler
 @export var recoil_position_z : Curve
 @export var recoil_amplitude := Vector3(1,1,1)
 
+@onready var pistol : AudioStreamPlayer = $"../../../../Pistol"
 
 
 @export var lerp_speed : float = 1
@@ -42,6 +43,7 @@ func _physics_process(delta):
 
 func apply_recoil():
 	camera_shake.add_trauma(camera_shake_amount)
+	pistol.play()
 	recoil_amplitude.y *= -1 if randf() > 0.5 else 1
 	target_rot.z = recoil_rotation_z.sample(0) * recoil_amplitude.y
 	target_rot.x = recoil_rotation_x.sample(0) * -recoil_amplitude.x
