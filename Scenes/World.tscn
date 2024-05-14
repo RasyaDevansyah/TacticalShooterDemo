@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://tbt5amptfwb"]
+
+[ext_resource type="Texture2D" uid="uid://brb436b21upht" path="res://godot-prototype-texture/PNG/grid_blue_512x512.png" id="1_xuuxx"]
+[ext_resource type="PackedScene" uid="uid://ge4ct6oeboaw" path="res://Scenes/pistol_project_accurate.tscn" id="2_rsl4k"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bktkc"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_ftcev"]
+sky_material = SubResource("ProceduralSkyMaterial_bktkc")
+
+[sub_resource type="Environment" id="Environment_y7iuc"]
+background_mode = 2
+sky = SubResource("Sky_ftcev")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_higyj"]
+albedo_texture = ExtResource("1_xuuxx")
+albedo_texture_force_srgb = true
+uv1_triplanar = true
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_08set"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_y7iuc")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+use_collision = true
+size = Vector3(52.5576, 0.001, 37.9729)
+material = SubResource("StandardMaterial3D_higyj")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.00986, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D_08set")
+
+[node name="CamHolder" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.618454, 0)
+metadata/_edit_group_ = true
+
+[node name="Camera3D" type="Camera3D" parent="Player/CamHolder"]
+
+[node name="WeaponHolder" type="Node3D" parent="Player/CamHolder"]
+
+[node name="Pistol Project Accurate" parent="Player/CamHolder/WeaponHolder" instance=ExtResource("2_rsl4k")]
+transform = Transform3D(-0.425, 0, -3.71547e-08, 0, 0.425, 0, 3.71547e-08, 0, -0.425, -0.045, -0.875, 0.28)
