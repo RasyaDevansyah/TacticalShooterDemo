@@ -49,3 +49,4 @@ func apply_recoil():
 	target_rot.x = recoil_rotation_x.sample(0) * -recoil_amplitude.x
 	target_pos.z = recoil_position_z.sample(0) * recoil_amplitude.z
 	current_time = 0
+
